@@ -1,0 +1,25 @@
+# Credentials & secrets
+credentials/
+*.json
+.env
+.env.*
+
+# Python
+__pycache__/
+*.pyc
+venv/
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+.next/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+.cursor/
