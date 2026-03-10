@@ -43,7 +43,10 @@ def get_google_docs_service():
     
     credentials = service_account.Credentials.from_service_account_file(
         credentials_path,
-        scopes=['https://www.googleapis.com/auth/documents.readonly']
+        scopes=[
+            'https://www.googleapis.com/auth/documents.readonly',
+            'https://www.googleapis.com/auth/drive.readonly',
+        ]
     )
     
     service = build('docs', 'v1', credentials=credentials)
