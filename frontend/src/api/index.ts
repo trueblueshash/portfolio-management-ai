@@ -5,5 +5,6 @@
 export { companiesApi } from './companies';
 export { documentsApi } from './documents';
 export { intelligenceApi } from './intelligence';
+export { metricsApi } from './metrics';
 export { default as apiClient } from './client';
 

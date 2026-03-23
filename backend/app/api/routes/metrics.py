@@ -67,6 +67,7 @@ def get_company_metrics(
                 "is_projected": m.is_projected,
                 "metrics": m.metrics,
                 "source": m.source,
+                "currency": m.currency or "USD",
             }
             for m in reversed(metrics)
         ],
@@ -91,6 +92,8 @@ def get_headline_metrics(
 
     if not latest:
         return {"company_name": company.name, "headlines": [], "period": None}
+
+    currency = latest.currency if latest and latest.currency else "USD"
 
     previous = db.query(PortfolioMetrics).filter(
         PortfolioMetrics.company_id == company_id,
@@ -126,7 +129,90 @@ def get_headline_metrics(
         "company_name": company.name,
         "period": latest.period_label,
         "period_date": latest.period.isoformat(),
+        "currency": currency,
         "headlines": result,
+    }
+
+
+@router.get("/companies/{company_id}/standard-view")
+def get_standard_view(
+    company_id: UUID,
+    limit: int = Query(12),
+    db: Session = Depends(get_db)
+):
+    """
+    Adaptive standard view — groups metrics by category, only shows populated data.
+    No fixed template; it discovers what data exists and organizes it.
+    """
+    from app.services.mis_parser import CATEGORY_DISPLAY_ORDER, detect_company_type
+
+    company = db.query(Company).filter(Company.id == company_id).first()
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+
+    company_type = detect_company_type(company.market_tags or [])
+
+    # Get actual periods with data
+    periods = db.query(PortfolioMetrics).filter(
+        PortfolioMetrics.company_id == company_id,
+        PortfolioMetrics.is_projected == False,
+    ).order_by(PortfolioMetrics.period.desc()).limit(limit).all()
+    periods = list(reversed(periods))
+
+    if not periods:
+        return {"company_name": company.name, "company_type": company_type, "sections": {}}
+
+    # Get catalog
+    catalog_entries = db.query(MetricsCatalog).filter(
+        MetricsCatalog.company_id == company_id
+    ).all()
+
+    # Group catalog entries by category
+    category_metrics = {}
+    for entry in catalog_entries:
+        cat = entry.category
+        if cat not in category_metrics:
+            category_metrics[cat] = []
+
+        # Check if this metric has ANY data in recent periods
+        has_data = False
+        for p in periods[-6:]:  # Check last 6 periods
+            if entry.raw_name in p.metrics and p.metrics[entry.raw_name] is not None:
+                has_data = True
+                break
+
+        if has_data:
+            category_metrics[cat].append({
+                "raw_name": entry.raw_name,
+                "display_name": entry.display_name,
+                "unit": entry.unit,
+                "is_headline": entry.is_headline,
+                "values": [
+                    {
+                        "period": p.period.isoformat(),
+                        "period_label": p.period_label,
+                        "value": p.metrics.get(entry.raw_name),
+                    }
+                    for p in periods
+                ],
+            })
+
+    # Sort categories by preferred order, only include non-empty ones
+    ordered_sections = {}
+    for cat in CATEGORY_DISPLAY_ORDER:
+        if cat in category_metrics and category_metrics[cat]:
+            ordered_sections[cat] = category_metrics[cat]
+
+    # Add any remaining categories not in the preferred order
+    for cat, metrics in category_metrics.items():
+        if cat not in ordered_sections and metrics:
+            ordered_sections[cat] = metrics
+
+    return {
+        "company_name": company.name,
+        "company_type": company_type,
+        "latest_period": periods[-1].period_label if periods else None,
+        "sections": ordered_sections,
     }
 
 

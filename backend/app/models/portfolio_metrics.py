@@ -28,6 +28,7 @@ class PortfolioMetrics(Base):
     # Source tracking
     source = Column(String, nullable=False, default="salesforce_mis")
     source_file = Column(String, nullable=True)
+    currency = Column(String, nullable=True, default="USD")  # "USD", "INR", "SGD" etc.
     upload_batch = Column(String, nullable=True)  # Groups metrics from same upload: "20260309_scrut_automation"
 
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

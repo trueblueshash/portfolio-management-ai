@@ -56,34 +56,39 @@ def check_relevance(
     content_preview = content[:3000]
     title_preview = title[:200]
     
-    prompt = f"""You are evaluating intelligence for {company_name}, a {market_description} company.
+    prompt = f"""You are a senior investment analyst evaluating market intelligence for {company_name}, a {market_description} company, on behalf of General Partners at a top-tier VC firm.
 
-Board members care about:
-✅ Strategic moves: Funding, M&A, major partnerships, market expansion
-✅ Competitive threats: Competitor product launches, big customer wins, pricing changes
-✅ Market validation: Awards, analyst recognition, customer traction metrics
-✅ Risks: Major customer losses, security incidents, regulatory issues
-✅ Product signals: Major feature launches, technology breakthroughs
-✅ Customer signals: Significant complaints/praise patterns, churn indicators
+ONLY flag items as relevant if a GP would mention them in a Monday partners meeting. Be VERY selective — reject 70%+ of content.
 
-Board members DON'T care about:
-❌ Routine blog posts
-❌ Generic marketing content
-❌ Minor feature updates
-❌ Unrelated industry news
-❌ Individual customer support issues
+✅ RELEVANT (score 0.7-1.0):
+- {company_name} directly mentioned: funding, revenue milestones, product launches, leadership changes, major customer wins/losses
+- Named competitors (like {', '.join(market_tags[:3]) if market_tags else 'key players'}) raising capital, launching products, making acquisitions, or losing key deals
+- Analyst/expert commentary from Gartner, Forrester, IDC, G2 specifically about {company_name} or its direct competitors
+- Market size updates, regulatory changes, or shifts that directly impact {company_name}'s TAM or competitive position
+- Strategic partnerships, channel deals, or geographic expansion by {company_name} or direct competitors
+
+❌ NOT RELEVANT (score 0.0-0.3) — REJECT these:
+- Generic industry news that doesn't name {company_name} or a direct competitor
+- Companies getting SOC 2 / ISO certified (unless it's {company_name} or a competitor)
+- Blog posts, thought leadership, or marketing content
+- Minor product updates, webinars, or events
+- Tangentially related companies in adjacent markets
+- Reddit posts that are generic discussions without specific company insights
+- News about companies that happen to be in the same broad industry but aren't competitors
+
+CRITICAL: If the content doesn't name {company_name} or one of its specific competitors, it is almost certainly NOT relevant. Generic market commentary is NOT relevant.
 
 Content to evaluate:
 Title: {title_preview}
 Content: {content_preview}
 
-Return JSON (no markdown, just raw JSON):
+Return JSON only (no markdown):
 {{
   "is_relevant": true/false,
   "relevance_score": 0.0-1.0,
-  "reason": "Why this matters to board members (or why not)",
-  "category": "product/gtm/traction/market_position/corporate/regulatory",
-  "summary": "2-3 sentence summary of what happened and impact"
+  "reason": "One sentence: why a GP would or wouldn't care",
+  "category": "product/gtm/traction/market_position/corporate/regulatory/funding",
+  "summary": "2-3 sentences: What happened, who is involved, and what it means for {company_name}. Be specific with names, numbers, and strategic implications."
 }}"""
 
     # Make API call - raise exception if it fails
@@ -122,7 +127,7 @@ Return JSON (no markdown, just raw JSON):
     result.setdefault("summary", "")
     
     # Validate category
-    valid_categories = ["product", "gtm", "traction", "market_position", "corporate", "regulatory"]
+    valid_categories = ["product", "gtm", "traction", "market_position", "corporate", "regulatory", "funding"]
     if result["category"] not in valid_categories:
         result["category"] = "corporate"
     
