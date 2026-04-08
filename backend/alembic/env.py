@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from app.core.config import get_settings
 settings = get_settings()
 from app.db.session import Base
-from app.models import company, intelligence, document  # Import models
+from app.models import company, intelligence, document, portfolio_metrics, onepager, public_comp, youtube_scan  # Import models
 
 # this is the Alembic Config object
 config = context.config

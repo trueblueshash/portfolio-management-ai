@@ -7,6 +7,8 @@ import QuestionAnswer from '../components/QuestionAnswer';
 import IntelligenceWidget from '../components/IntelligenceWidget';
 import MetricsCard from '../components/MetricsCard';
 import AddDocumentModal from '../components/AddDocumentModal';
+import OnePagerSection from '../components/OnePagerSection';
+import CompsTable from '../components/CompsTable';
 import { DocumentQuestionResponse } from '../types';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -18,7 +20,7 @@ export default function CompanyDetail() {
   const [currentQuestion, setCurrentQuestion] = useState('');
   const [answer, setAnswer] = useState<DocumentQuestionResponse | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [activeSection, setActiveSection] = useState<'overview' | 'metrics' | 'documents'>('overview');
+  const [activeSection, setActiveSection] = useState<'overview' | 'metrics' | 'documents' | 'comps'>('overview');
 
   const { data: company, isLoading, error } = useQuery({
     queryKey: ['company', id],
@@ -38,19 +40,12 @@ export default function CompanyDetail() {
     enabled: !!id,
   });
 
-  const { data: companyDocuments } = useQuery({
-    queryKey: ['company-documents', id],
-    queryFn: () => companiesApi.getCompanyDocuments(id!),
-    enabled: !!id,
-  });
-
   const { data: allDocuments } = useQuery({
     queryKey: ['documents', id],
     queryFn: async () => { const r = await documentsApi.getAll(id); return r.documents; },
     enabled: !!id,
   });
 
-  const latestDoc = companyDocuments?.length ? [...companyDocuments].sort((a: any, b: any) => new Date(b.document_date).getTime() - new Date(a.document_date).getTime())[0] : null;
   const allDocs = allDocuments ? [...allDocuments].sort((a: any, b: any) => new Date(b.document_date).getTime() - new Date(a.document_date).getTime()) : [];
 
   const askMutation = useMutation({
@@ -169,7 +164,7 @@ export default function CompanyDetail() {
       {/* Section Tabs */}
       <div className="border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6 flex gap-0">
-          {(['overview', 'metrics', 'documents'] as const).map((tab) => (
+          {(['overview', 'metrics', 'documents', 'comps'] as const).map((tab) => (
             <button key={tab} onClick={() => setActiveSection(tab)}
               className={`px-5 py-3 text-sm font-medium capitalize transition-colors ${
                 activeSection === tab ? 'text-gray-900 border-b-2 border-dawn' : 'text-gray-400 hover:text-gray-600 border-b-2 border-transparent'
@@ -199,21 +194,8 @@ export default function CompanyDetail() {
                   <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-200 border-t-dawn mx-auto mb-3" />
                   <p className="text-sm text-gray-500">Searching across documents...</p>
                 </div>
-              ) : latestDoc?.summary ? (
-                <div className="border border-gray-200 rounded-xl overflow-hidden">
-                  <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50">
-                    <h2 className="font-serif text-xl text-gray-900">Latest Summary</h2>
-                    <p className="text-xs text-gray-400 mt-1">From {latestDoc.title} · {formatDate(latestDoc.document_date)}</p>
-                  </div>
-                  <div className="px-6 py-5">
-                    <p className="text-sm text-gray-600 whitespace-pre-wrap leading-relaxed">{latestDoc.summary}</p>
-                  </div>
-                </div>
               ) : (
-                <div className="border border-gray-200 rounded-xl p-12 text-center">
-                  <p className="text-gray-500 text-sm mb-1">Ask a question to get started</p>
-                  <p className="text-xs text-gray-400">Try asking about ARR, growth, challenges, or competitive positioning</p>
-                </div>
+                <OnePagerSection companyId={company.id} />
               )}
 
               {/* Company Info */}
@@ -369,6 +351,11 @@ export default function CompanyDetail() {
               </div>
             )}
           </div>
+        )}
+
+        {/* COMPS TAB */}
+        {activeSection === 'comps' && (
+          <CompsTable companyId={company.id} />
         )}
       </div>
 

@@ -1,5 +1,5 @@
 from sqlalchemy import Column, String, DateTime, JSON, Boolean, Integer, func
-from sqlalchemy.dialects.postgresql import UUID, ARRAY
+from sqlalchemy.dialects.postgresql import UUID, ARRAY, JSONB
 import uuid
 from app.db.base import Base
 
@@ -12,6 +12,7 @@ class Company(Base):
     market_tags = Column(ARRAY(String), nullable=False, default=list)
     competitors = Column(ARRAY(String), nullable=False, default=list)
     sources = Column(JSON, nullable=False, default=dict)
+    comp_tickers = Column(JSONB, default=dict)  # {"CompanyName": "TICKER" or null}
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     # Google Doc integration fields

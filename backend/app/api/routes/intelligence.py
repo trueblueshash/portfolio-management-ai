@@ -7,6 +7,7 @@ from datetime import datetime
 from app.db.session import get_db
 from app.models.intelligence import IntelligenceItem
 from app.models.company import Company
+from app.services.dedup_helper import is_duplicate_title
 from app.schemas.intelligence import IntelligenceItem as IntelligenceItemSchema, IntelligenceItemCreate, IntelligenceItemUpdate
 
 router = APIRouter(prefix="/intelligence", tags=["intelligence"])
@@ -70,6 +71,9 @@ def create_intelligence_item(item: IntelligenceItemCreate, db: Session = Depends
     ).first()
     if existing:
         raise HTTPException(status_code=400, detail="Intelligence item with this source_url already exists")
+
+    if is_duplicate_title(db, item.company_id, item.title):
+        raise HTTPException(status_code=400, detail="Intelligence item with similar title already exists recently")
     
     db_item = IntelligenceItem(**item.model_dump())
     db.add(db_item)

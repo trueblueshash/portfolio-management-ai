@@ -150,3 +150,59 @@ export interface GoogleDocStatus {
   message?: string;
 }
 
+export interface MetricRow {
+  metric_name: string;
+  current_value: string;
+  previous_value: string;
+  change_pct: string;
+  trend: "up" | "down" | "flat";
+  unit: string;
+}
+
+export interface OnePager {
+  id: string;
+  company_id: string;
+  generated_at: string;
+  generated_by: "ai" | "manual";
+  is_latest: boolean;
+  period_label: string;
+  stance: "green" | "yellow" | "red";
+  stance_summary: string;
+  next_milestone: string;
+  metrics_table: MetricRow[];
+  performance_narrative: string[];
+  working_well: string[];
+  needs_improvement: string[];
+  value_creation: string[];
+  data_sources: {
+    metrics_periods: string[];
+    documents_used: boolean | Array<{ id: string; title: string; date: string | null }>;
+    intelligence_count: number;
+  };
+  last_edited_at: string | null;
+  edit_history?: Array<{ field: string; edited_at: string; old_value?: any; new_value?: any }>;
+}
+
+export interface PublicComp {
+  id: string;
+  company_id: string;
+  comp_name: string;
+  ticker: string | null;
+  is_portfolio_company: boolean;
+  revenue_ttm_millions: number | null;
+  revenue_currency: string;
+  revenue_growth_pct: number | null;
+  gross_margin_pct: number | null;
+  operating_margin_pct: number | null;
+  fcf_margin_pct: number | null;
+  sm_pct_of_revenue: number | null;
+  rd_pct_of_revenue: number | null;
+  rule_of_40: number | null;
+  nrr_pct: number | null;
+  employees: number | null;
+  revenue_per_employee_k: number | null;
+  data_source: string;
+  fiscal_period: string | null;
+  fetched_at: string | null;
+}
+

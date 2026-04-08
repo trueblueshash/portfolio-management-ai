@@ -9,6 +9,7 @@ from typing import Optional, Dict, Any
 from sqlalchemy.orm import Session
 from app.models.company import Company
 from app.models.intelligence import IntelligenceItem
+from app.services.dedup_helper import is_duplicate_title
 from app.services.relevance_filter import check_relevance
 
 logger = logging.getLogger(__name__)
@@ -58,6 +59,11 @@ class BaseScraper(ABC):
         
         if existing:
             logger.debug(f"⏭️  Skipping duplicate: {source_url}")
+            return False
+
+        # Check for title-similar duplicates in recent window
+        if is_duplicate_title(self.db, self.company.id, title):
+            logger.debug(f"⏭️  Skipping near-duplicate title: {title[:80]}")
             return False
         
         # Check minimum content length

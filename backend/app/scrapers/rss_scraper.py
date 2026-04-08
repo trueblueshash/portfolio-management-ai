@@ -5,6 +5,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from app.models.company import Company
 from app.models.intelligence import IntelligenceItem
+from app.services.dedup_helper import is_duplicate_title
 from app.services.summarizer import summarize_content
 from app.services.classifier import classify_content
 
@@ -80,6 +81,9 @@ def scrape_company_blog(company: Company, db: Session) -> int:
 
                 if existing:
                     continue  # Skip duplicates
+
+                if is_duplicate_title(db, company.id, entry.get("title", "Untitled")):
+                    continue
 
                 # Extract content
                 title = entry.get("title", "Untitled")
