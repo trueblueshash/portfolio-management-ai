@@ -193,6 +193,7 @@ def _build_portfolio_company_row(company: Company, company_id: UUID, db: Session
     revenue = None
     revenue_growth = None
     gross_margin = None
+    currency = "USD"
 
     catalog = db.query(MetricsCatalog).filter(
         MetricsCatalog.company_id == company_id
@@ -204,21 +205,28 @@ def _build_portfolio_company_row(company: Company, company_id: UUID, db: Session
         if not cat:
             continue
         display = (cat.display_name or "").lower()
+        unit = (cat.unit or "").lower()
         try:
             num_val = float(str(value).replace(",", "").replace("₹", "").replace("$", ""))
         except (ValueError, TypeError):
             continue
 
-        if "arr" in display or "exit arr" in display or "revenue" in display:
+        if "arr" in display or "revenue" in display or "exit arr" in display:
             revenue = num_val
-        elif "revenue growth" in display or "growth" in display:
+            # Convert based on catalog unit (e.g. USD Thousands -> millions)
+            if "thousand" in unit or "$k" in unit or "k" in unit:
+                revenue = num_val / 1000
+                currency = "USD"
+            elif "mn" in unit or "million" in unit:
+                currency = "USD"
+            elif "cr" in unit or "inr" in unit or "₹" in unit:
+                currency = "INR"
+            elif "$" in unit or "usd" in unit:
+                currency = "USD"
+        elif "growth" in display:
             revenue_growth = num_val
         elif "gross margin" in display:
             gross_margin = num_val
-
-    currency = latest.currency if getattr(latest, "currency", None) else "INR"
-    if currency not in {"USD", "INR"}:
-        currency = "USD"
 
     return PublicComp(
         company_id=company_id,

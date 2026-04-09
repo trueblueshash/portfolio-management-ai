@@ -9,6 +9,7 @@ const SOURCE_STYLES: Record<string, { label: string; color: string; bg: string }
   competitor: { label: 'Competitor', color: 'text-red-600', bg: 'bg-red-50' },
   blog: { label: 'Blog', color: 'text-emerald-700', bg: 'bg-emerald-50' },
   reddit: { label: 'Reddit', color: 'text-orange-600', bg: 'bg-orange-50' },
+  youtube: { label: 'YouTube', color: 'text-rose-700', bg: 'bg-rose-50' },
 };
 
 const CAT_STYLES: Record<string, { color: string; bg: string }> = {
@@ -19,9 +20,31 @@ const CAT_STYLES: Record<string, { color: string; bg: string }> = {
   market_position: { color: 'text-cyan-700', bg: 'bg-cyan-50' },
   corporate: { color: 'text-gray-600', bg: 'bg-gray-100' },
   regulatory: { color: 'text-violet-700', bg: 'bg-violet-50' },
+  competitive_intel: { color: 'text-red-700', bg: 'bg-red-50' },
+  market_trend: { color: 'text-sky-700', bg: 'bg-sky-50' },
+  strategy: { color: 'text-purple-700', bg: 'bg-purple-50' },
+  technology: { color: 'text-teal-700', bg: 'bg-teal-50' },
+  fundraising: { color: 'text-amber-700', bg: 'bg-amber-50' },
+  hiring: { color: 'text-lime-800', bg: 'bg-lime-50' },
 };
 
-type TabType = 'all' | 'news' | 'reddit' | 'competitor';
+const TAB_ORDER: Array<'all' | 'news' | 'reddit' | 'competitor' | 'youtube'> = [
+  'all',
+  'news',
+  'reddit',
+  'competitor',
+  'youtube',
+];
+
+const TAB_LABELS: Record<(typeof TAB_ORDER)[number], string> = {
+  all: 'All',
+  news: 'News',
+  reddit: 'Reddit',
+  competitor: 'Competitor',
+  youtube: 'YouTube',
+};
+
+type TabType = (typeof TAB_ORDER)[number];
 
 export default function IntelligenceWidget({ companyId, limit = 10 }: { companyId: string; limit?: number }) {
   const [activeTab, setActiveTab] = useState<TabType>('all');
@@ -30,9 +53,15 @@ export default function IntelligenceWidget({ companyId, limit = 10 }: { companyI
 
   const { data: items, isLoading } = useQuery({
     queryKey: ['intelligence', companyId, activeTab, visibleCount],
-    queryFn: () => intelligenceApi.getByCompany(companyId, {
-      source_type: activeTab === 'all' ? undefined : activeTab,
-    }, visibleCount),
+    queryFn: () =>
+      intelligenceApi.getByCompany(
+        companyId,
+        {
+          // Only filter by source when a specific tab is selected; "all" returns every source_type including youtube.
+          source_type: activeTab === 'all' ? undefined : activeTab,
+        },
+        visibleCount
+      ),
     enabled: !!companyId,
   });
 
@@ -57,13 +86,13 @@ export default function IntelligenceWidget({ companyId, limit = 10 }: { companyI
       <div className="px-5 pt-5 pb-4">
         <h3 className="font-serif text-lg text-gray-900 mb-1">Market Intelligence</h3>
         <p className="text-xs text-gray-400 mb-4">Latest signals · {items?.length ?? 0} items</p>
-        <div className="flex gap-1.5">
-          {(['all', 'news', 'reddit', 'competitor'] as TabType[]).map((tab) => (
+        <div className="flex gap-1.5 flex-wrap">
+          {TAB_ORDER.map((tab) => (
             <button key={tab} onClick={() => { setActiveTab(tab); setVisibleCount(limit); }}
               className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all ${
                 activeTab === tab ? 'bg-dawn text-white' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
               }`}>
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              {TAB_LABELS[tab]}
             </button>
           ))}
         </div>
@@ -72,7 +101,7 @@ export default function IntelligenceWidget({ companyId, limit = 10 }: { companyI
       {(!items || items.length === 0) ? (
         <div className="p-8 text-center">
           <p className="text-gray-400 text-sm">
-            No {activeTab === 'all' ? 'market intelligence' : activeTab} found
+            No {activeTab === 'all' ? 'market intelligence' : `${TAB_LABELS[activeTab]} items`} found
           </p>
           <p className="text-xs text-gray-300 mt-1">
             {activeTab !== 'all' ? 'Try switching to "All"' : 'Run scrapers to collect updates'}
@@ -84,6 +113,9 @@ export default function IntelligenceWidget({ companyId, limit = 10 }: { companyI
             {items.map((item: IntelligenceItem) => {
               const src = SOURCE_STYLES[item.source_type] || SOURCE_STYLES.news;
               const cat = item.result_category ? CAT_STYLES[item.result_category] || CAT_STYLES.corporate : null;
+              const categoryLabel = item.result_category
+                ? item.result_category.replace(/_/g, ' ')
+                : '';
               const isExpanded = expandedItem === item.id;
 
               return (
@@ -91,7 +123,11 @@ export default function IntelligenceWidget({ companyId, limit = 10 }: { companyI
                   <button onClick={() => setExpandedItem(isExpanded ? null : item.id)} className="w-full text-left">
                     <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                       <span className={`px-2 py-0.5 text-[10px] font-semibold rounded ${src.bg} ${src.color} uppercase tracking-wide`}>{src.label}</span>
-                      {cat && <span className={`px-2 py-0.5 text-[10px] font-semibold rounded ${cat.bg} ${cat.color} uppercase tracking-wide`}>{item.result_category?.replace('_', ' ')}</span>}
+                      {cat && categoryLabel && (
+                        <span className={`px-2 py-0.5 text-[10px] font-semibold rounded ${cat.bg} ${cat.color} uppercase tracking-wide`}>
+                          {categoryLabel}
+                        </span>
+                      )}
                       <span className="text-[11px] text-gray-300 ml-auto">
                         {item.published_date ? formatDistanceToNow(new Date(item.published_date), { addSuffix: true }) : 'Recently'}
                       </span>

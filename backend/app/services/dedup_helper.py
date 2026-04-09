@@ -15,7 +15,8 @@ def is_duplicate_title(db: Session, company_id, new_title: str, days_back: int =
         return set(title.split())
 
     new_words = normalize(new_title or "")
-    if len(new_words) < 3:
+    # Short titles: skip duplicate detection (avoids false matches vs longer titles)
+    if len(new_words) < 4:
         return False
 
     cutoff = datetime.utcnow() - timedelta(days=days_back)
@@ -26,10 +27,10 @@ def is_duplicate_title(db: Session, company_id, new_title: str, days_back: int =
 
     for item in recent_items:
         existing_words = normalize(item.title or "")
-        if len(existing_words) < 3:
+        if len(existing_words) < 4:
             continue
         overlap = len(new_words & existing_words)
         similarity = overlap / max(len(new_words), len(existing_words))
-        if similarity >= 0.7:
+        if similarity >= 0.75:
             return True
     return False
