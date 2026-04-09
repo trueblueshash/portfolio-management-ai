@@ -13,7 +13,13 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "not-used-yet"
     APP_API_KEY: str = "lightspeed2026"
     DEBUG: bool = True
-    CORS_ORIGINS: list = ["http://localhost:3000", "http://localhost:5173", "http://localhost:8000"]
+    CORS_ORIGINS: list = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:8000",
+        "https://portfolio-management-ai.vercel.app",
+        "https://portfolio-management-ai-production.up.railway.app",
+    ]
     
     class Config:
         env_file = ".env"
