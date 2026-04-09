@@ -2,6 +2,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
+from app.middleware.auth import APIKeyMiddleware
 from app.api.routes import companies, intelligence, documents, metrics, onepager, comps, youtube
 
 logging.basicConfig(level=logging.INFO)
@@ -12,7 +13,9 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# CORS
+# Middleware order: last added runs first on incoming requests.
+# Add APIKey first (inner), then CORS (outer) so CORS handles preflight and headers before auth.
+app.add_middleware(APIKeyMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,

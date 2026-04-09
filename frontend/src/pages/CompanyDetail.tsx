@@ -8,6 +8,7 @@ import IntelligenceWidget from '../components/IntelligenceWidget';
 import MetricsCard from '../components/MetricsCard';
 import AddDocumentModal from '../components/AddDocumentModal';
 import OnePagerSection from '../components/OnePagerSection';
+import LogoutButton from '../components/LogoutButton';
 import CompsTable from '../components/CompsTable';
 import { DocumentQuestionResponse } from '../types';
 import { formatDistanceToNow } from 'date-fns';
@@ -103,10 +104,11 @@ export default function CompanyDetail() {
             <div className="h-5 w-px bg-gray-200" />
             <h1 className="font-serif text-2xl text-gray-900">{company.name}</h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {(company.market_tags || []).slice(0, 3).map((tag: string, i: number) => (
               <span key={i} className="px-2.5 py-1 bg-gray-50 text-gray-500 text-xs rounded-md font-medium">{tag}</span>
             ))}
+            <LogoutButton />
           </div>
         </div>
       </header>

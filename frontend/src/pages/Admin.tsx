@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { companiesApi, documentsApi } from '../api';
+import LogoutButton from '../components/LogoutButton';
 import ConnectGoogleDoc from '../components/ConnectGoogleDoc';
 import DocumentUpload from '../components/DocumentUpload';
 import { CompanyWithStats } from '../types';
@@ -48,12 +49,15 @@ export default function Admin() {
               </div>
               <span className="text-gray-900 font-semibold">Admin Dashboard</span>
             </div>
-            <button
-              onClick={() => navigate('/')}
-              className="text-gray-600 hover:text-gray-900"
-            >
-              🏠 Home
-            </button>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate('/')}
+                className="text-gray-600 hover:text-gray-900 text-sm"
+              >
+                🏠 Home
+              </button>
+              <LogoutButton className="text-sm" />
+            </div>
           </div>
         </div>
       </header>

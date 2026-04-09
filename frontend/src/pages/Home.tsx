@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { companiesApi } from '../api';
+import LogoutButton from '../components/LogoutButton';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -31,9 +32,12 @@ export default function Home() {
             <span className="text-gray-900 font-semibold text-sm">Lightspeed India</span>
             <span className="text-gray-400 text-sm font-light">/ Portfolio Intelligence</span>
           </div>
-          <button onClick={() => navigate('/admin')} className="text-gray-400 hover:text-gray-600 text-sm">
-            Settings
-          </button>
+          <div className="flex items-center gap-4">
+            <button onClick={() => navigate('/admin')} className="text-gray-400 hover:text-gray-600 text-sm">
+              Settings
+            </button>
+            <LogoutButton />
+          </div>
         </div>
       </header>
 

@@ -5,6 +5,7 @@ import DocumentList from '../components/DocumentList';
 import DocumentQA from '../components/DocumentQA';
 import GoogleDocStatus from '../components/GoogleDocStatus';
 import { companiesApi } from '../api';
+import LogoutButton from '../components/LogoutButton';
 import { PortfolioDocument, CompanyWithStats } from '../types';
 
 type Tab = 'ask' | 'gdocs' | 'upload';
@@ -28,13 +29,16 @@ export default function Documents() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Portfolio Knowledge Hub
-          </h1>
-          <p className="text-gray-600">
-            Ask questions, manage Google Docs, and upload reference documents
-          </p>
+        <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Portfolio Knowledge Hub
+            </h1>
+            <p className="text-gray-600">
+              Ask questions, manage Google Docs, and upload reference documents
+            </p>
+          </div>
+          <LogoutButton className="text-sm" />
         </div>
 
         {/* Tabs */}
