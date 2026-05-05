@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { documentsApi } from '../api';
-import { DocumentQuestionRequest, DocumentQuestionResponse, CompanyWithStats } from '../types';
+import { DocumentQuestionRequest, CompanyWithStats } from '../types';
 
 interface DocumentQAProps {
   companies?: CompanyWithStats[];

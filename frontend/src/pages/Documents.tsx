@@ -6,7 +6,7 @@ import DocumentQA from '../components/DocumentQA';
 import GoogleDocStatus from '../components/GoogleDocStatus';
 import { companiesApi } from '../api';
 import LogoutButton from '../components/LogoutButton';
-import { PortfolioDocument, CompanyWithStats } from '../types';
+import { PortfolioDocument } from '../types';
 
 type Tab = 'ask' | 'gdocs' | 'upload';
 

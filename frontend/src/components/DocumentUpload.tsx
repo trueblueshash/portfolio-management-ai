@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { documentsApi, companiesApi } from '../api';
-import { DocumentType, PortfolioDocument, CompanyWithStats } from '../types';
+import { DocumentType, PortfolioDocument } from '../types';
 
 interface DocumentUploadProps {
   onUploadComplete?: (document: PortfolioDocument) => void;
