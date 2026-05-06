@@ -18,6 +18,7 @@ class Settings(BaseSettings):
         "http://localhost:5173",
         "http://localhost:8000",
         "https://portfolio-management-ai.vercel.app",
+        "https://lsip-portfolio.vercel.app",
         "https://portfolio-management-ai-production.up.railway.app",
     ]
     
